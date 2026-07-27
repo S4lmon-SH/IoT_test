@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#f4f6f1" />
+    <title>Room 01 · 환경 모니터</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script src="/static/app.js" defer></script>
+  </head>
+  <body>
+    <div class="ambient ambient-left" aria-hidden="true"></div>
+    <div class="ambient ambient-right" aria-hidden="true"></div>
+
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="환경 모니터 홈">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span>
+          <strong>ROOM / 01</strong>
+          <small>ENVIRONMENT MONITOR</small>
+        </span>
+      </a>
+
+      <div class="header-status">
+        <span id="connection-dot" class="status-dot is-waiting"></span>
+        <span id="connection-label">데이터 기다리는 중</span>
+        <time id="header-time" aria-label="현재 시각">--:--</time>
+      </div>
+    </header>
+
+    <main class="dashboard">
+      <section class="intro">
+        <div>
+          <p class="eyebrow">MY ROOM · LIVE CONDITIONS</p>
+          <h1>방의 공기를<br /><em>한눈에.</em></h1>
+        </div>
+        <div class="intro-copy">
+          <p id="comfort-message">
+            첫 번째 센서 데이터가 도착하면 현재 환경을 분석합니다.
+          </p>
+          <span id="last-updated">아직 수신된 데이터가 없습니다</span>
+        </div>
+      </section>
+
+      <section class="metric-grid" aria-label="현재 환경">
+        <article class="metric-card temperature-card">
+          <div class="metric-head">
+            <span class="metric-icon temperature-icon" aria-hidden="true">
+              <i></i>
+            </span>
+            <span>온도</span>
+            <span class="metric-unit">CELSIUS</span>
+          </div>
+          <div class="metric-value">
+            <strong id="temperature-value">--.-</strong>
+            <sup>°C</sup>
+          </div>
+          <div class="metric-foot">
+            <span>최근 24시간</span>
+            <span id="temperature-range">최저 -- · 최고 --</span>
+          </div>
+        </article>
+
+        <article class="metric-card humidity-card">
+          <div class="metric-head">
+            <span class="metric-icon humidity-icon" aria-hidden="true"></span>
+            <span>습도</span>
+            <span class="metric-unit">RELATIVE</span>
+          </div>
+          <div class="metric-value">
+            <strong id="humidity-value">--</strong>
+            <sup>%</sup>
+          </div>
+          <div class="metric-foot">
+            <span>최근 24시간</span>
+            <span id="humidity-range">최저 -- · 최고 --</span>
+          </div>
+        </article>
+
+        <article class="metric-card comfort-card">
+          <div class="metric-head">
+            <span class="metric-icon comfort-icon" aria-hidden="true">
+              <i></i>
+            </span>
+            <span>환경 상태</span>
+            <span class="metric-unit">COMFORT</span>
+          </div>
+          <div class="comfort-value">
+            <strong id="comfort-value">대기 중</strong>
+            <span id="comfort-description">센서 연결 필요</span>
+          </div>
+          <div class="comfort-scale" aria-hidden="true">
+            <span></span><span></span><span></span><span></span><span></span>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel chart-panel">
+        <div class="panel-head">
+          <div>
+            <p class="eyebrow">HISTORY</p>
+            <h2>온습도 변화</h2>
+          </div>
+          <div class="range-picker" aria-label="그래프 기간">
+            <button
+              class="range-button is-active"
+              data-range="1h"
+              title="최근 1시간을 1분 간격으로 표시"
+            >1시간</button>
+            <button class="range-button" data-range="24h">24시간</button>
+            <button class="range-button" data-range="7d">7일</button>
+            <button class="range-button" data-range="30d">30일</button>
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <span><i class="legend-temperature"></i>온도 °C</span>
+          <span><i class="legend-humidity"></i>습도 %</span>
+          <span id="sample-count">1분 간격 · 0개 측정값</span>
+        </div>
+
+        <div id="chart-wrap" class="chart-wrap">
+          <svg
+            id="environment-chart"
+            viewBox="0 0 1000 360"
+            preserveAspectRatio="none"
+            role="img"
+            aria-label="온도와 습도 변화 그래프"
+          ></svg>
+          <div id="chart-tooltip" class="chart-tooltip" hidden></div>
+          <div id="chart-empty" class="chart-empty">
+            <span class="empty-wave" aria-hidden="true"></span>
+            <strong>첫 측정값을 기다리고 있습니다</strong>
+            <p>Arduino가 데이터를 보내면 여기에 그래프가 나타납니다.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="detail-grid">
+        <article class="panel summary-panel">
+          <div class="panel-head">
+            <div>
+              <p class="eyebrow">24 HOUR SUMMARY</p>
+              <h2>오늘의 기록</h2>
+            </div>
+          </div>
+          <div class="summary-list">
+            <div>
+              <span>평균 온도</span>
+              <strong id="temperature-average">--.-°</strong>
+            </div>
+            <div>
+              <span>평균 습도</span>
+              <strong id="humidity-average">--%</strong>
+            </div>
+            <div>
+              <span>측정 횟수</span>
+              <strong id="reading-count">0</strong>
+            </div>
+            <div>
+              <span>움직임 감지</span>
+              <strong id="motion-count">사용 안 함</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel device-panel">
+          <div class="device-visual" aria-hidden="true">
+            <span class="signal signal-one"></span>
+            <span class="signal signal-two"></span>
+            <span class="device-board">
+              <i></i><i></i><i></i><i></i>
+            </span>
+          </div>
+          <div class="device-copy">
+            <p class="eyebrow">DEVICE</p>
+            <h2>UNO R4 WiFi</h2>
+            <dl>
+              <div>
+                <dt>장치 ID</dt>
+                <dd id="device-id">room-uno-r4</dd>
+              </div>
+              <div>
+                <dt>서버 상태</dt>
+                <dd><span class="mini-dot"></span>정상</dd>
+              </div>
+              <div>
+                <dt>전송 주기</dt>
+                <dd>60초</dd>
+              </div>
+            </dl>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer>
+      <span>ROOM / 01</span>
+      <span>Arduino UNO R4 WiFi · DHT11</span>
+    </footer>
+  </body>
+</html>

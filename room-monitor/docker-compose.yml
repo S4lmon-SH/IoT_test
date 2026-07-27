@@ -1,0 +1,59 @@
+services:
+  app:
+    build:
+      context: ./server
+    environment:
+      API_KEY: ${API_KEY:-local-development-key}
+      DATABASE_PATH: /app/data/room-monitor.db
+    volumes:
+      - ./data:/app/data
+    ports:
+      - "127.0.0.1:8000:8000"
+    restart: unless-stopped
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+  caddy:
+    image: caddy:2.10-alpine
+    profiles:
+      - production
+    depends_on:
+      app:
+        condition: service_healthy
+    environment:
+      PUBLIC_IP: ${PUBLIC_IP}
+      PUBLIC_HOST: ${PUBLIC_HOST}
+      DASHBOARD_USER: ${DASHBOARD_USER}
+      DASHBOARD_PASSWORD_HASH: ${DASHBOARD_PASSWORD_HASH}
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - ./certbot/etc:/etc/letsencrypt:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    ports:
+      - "80:80"
+      - "443:443"
+    restart: unless-stopped
+
+  certbot:
+    image: certbot/certbot:v5.4.0
+    profiles:
+      - certificate
+    volumes:
+      - ./certbot/etc:/etc/letsencrypt
+      - ./certbot/lib:/var/lib/letsencrypt
+      - ./certbot/log:/var/log/letsencrypt
+    ports:
+      - "80:80"
+
+volumes:
+  caddy_data:
+  caddy_config:

@@ -1,0 +1,15 @@
+# Codex/session metadata and downloaded toolchains
+.agents/
+.tools/
+
+# Local photos and deployment archives
+*.jpg
+*.jpeg
+*.png
+*.tar.gz
+*.zip
+
+# Operating-system files
+.DS_Store
+Thumbs.db
+Desktop.ini

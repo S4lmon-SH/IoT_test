@@ -1,0 +1,38 @@
+{
+	default_sni {$PUBLIC_IP}
+}
+
+http://{$PUBLIC_IP} {
+	redir https://{$PUBLIC_HOST}{uri} permanent
+}
+
+http://{$PUBLIC_HOST} {
+	redir https://{$PUBLIC_HOST}{uri} permanent
+}
+
+https://{$PUBLIC_IP} {
+	tls /etc/letsencrypt/live/{$PUBLIC_IP}/fullchain.pem /etc/letsencrypt/live/{$PUBLIC_IP}/privkey.pem
+	redir https://{$PUBLIC_HOST}{uri} permanent
+}
+
+https://{$PUBLIC_HOST} {
+	tls /etc/letsencrypt/live/{$PUBLIC_HOST}/fullchain.pem /etc/letsencrypt/live/{$PUBLIC_HOST}/privkey.pem
+	encode zstd gzip
+
+	@device_ingest path /api/v1/readings
+	handle @device_ingest {
+		reverse_proxy app:8000
+	}
+
+	@health path /health
+	handle @health {
+		reverse_proxy app:8000
+	}
+
+	handle {
+		basic_auth {
+			{$DASHBOARD_USER} {$DASHBOARD_PASSWORD_HASH}
+		}
+		reverse_proxy app:8000
+	}
+}
